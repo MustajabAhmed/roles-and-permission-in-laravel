@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\User\BaseController;
+use App\Http\Controllers\User\ProfileController;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,41 +25,22 @@ Route::get('/clear', function () {
     return "Cleared";
 });
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
-
-Route::get('verify', function () {
-    return view('auth.verify');
-})->name('verify_email');
-
-Auth::routes(['verify' => true, 'login' => false, 'register' => false]);
-
-Route::get('/logout', [HomeController::class, 'logout'])->name('logout');
-
-Route::get('/user/signin', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/user/signin', [LoginController::class, 'login']);
-
-Route::get('/user/signup', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/user/signup', [RegisterController::class, 'register']);
-
 Route::group(
-    ['prefix' => "/dashboard/", "middleware" => ["auth", 'checkMail']],
+    ['prefix' => "/"],
     function () {
-        Route::get('', [HomeController::class, 'index'])->name('auth');
 
-        // Route::get('my-profile', [UserController::class, 'editprofile'])->name('myprofile');
-        // Route::put('edit-my-profile', [UserController::class, 'updatemyprofile'])->name('updatemyprofile');
+        Route::get('/', [HomeController::class, 'index'])->name('index');
 
-        // change password
-        Route::get('/settings', [HomeController::class, 'changePassword'])->name('change_password');
-        Route::post('/change-password/update', [HomeController::class, 'updatePassword'])->name('update_password');
-
-        // Route::group(
-        //     ["middleware" => "role:admin"],
-        //     function () {
-        //         Route::resource('users', UserController::class)->middleware('isAdmin');
-        //     }
-        // );
+        Route::group(
+            ['prefix' => 'user', 'as' => 'user.', 'middleware' => ['web', 'auth', 'checkMail']],
+            function () {
+                Route::get('/', [BaseController::class, 'home'])->name('home');
+                Route::get('dashboard', [BaseController::class, 'index'])->name('index');
+                Route::resource('profiles', ProfileController::class);
+            }
+        );
     }
 );
+
+require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';

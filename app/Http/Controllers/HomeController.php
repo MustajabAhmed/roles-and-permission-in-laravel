@@ -16,7 +16,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     /**
@@ -26,13 +26,13 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('index');
     }
 
     public function logout()
     {
         Auth::logout();
-        return redirect()->route('welcome');
+        return redirect()->route('index');
     }
     
     public function changePassword()
